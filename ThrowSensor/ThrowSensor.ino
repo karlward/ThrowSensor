@@ -10,23 +10,26 @@
 // NOTE: depends on Filter v0.6.1 or possibly a later version
 #include "Filter.h"
 
-const int myGroup = 1; // Xbee group
-const int nextGroup = myGroup + 1;
+//const int myGroup = 1; // Xbee group
+//const int nextGroup = myGroup + 1;
+const int nextGroup = 3;
 
-SoftwareSerial xbee(2, 3);
+SoftwareSerial xbee(10, 9);
+const int groundXbeePin = 2;
 
 Filter fx(40); 
 Filter fy(40);
 Filter fz(40);
 
 // accelerometer pins
-const int groundPin = A2;             // ground
 const int powerPin = A0;              // voltage
-const int xPin = A5;                  // x-axis of the accelerometer
+const int vOutPin = A1;               // unused
+const int groundPin = A2;             // ground
+const int zPin = A3;                  // z-axis of the accelerometer
 const int yPin = A4;                  // y-axis
-const int zPin = A3;                  // z-axis
+const int xPin = A5;                  // x-axis
 
-float sensitivity = 1.2; // higher number increases sensitivity
+float sensitivity = 2; // higher number increases sensitivity
 // FIXME: should make this dynamic, based on stDevSample
 
 void setup() { 
@@ -35,12 +38,18 @@ void setup() {
     ;
   }
   
-  xbee.begin(9600); // connect to Xbee over software serial
   
   pinMode(groundPin, OUTPUT);
   pinMode(powerPin, OUTPUT);
+  pinMode(vOutPin, OUTPUT);
   digitalWrite(groundPin, LOW); 
   digitalWrite(powerPin, HIGH);
+  digitalWrite(vOutPin, LOW);
+
+  pinMode(groundXbeePin, OUTPUT);
+  digitalWrite(groundXbeePin, LOW);
+  delay(10);
+  xbee.begin(9600); // connect to Xbee over software serial
   
   fx.attachFilter(throwSensor);
   fy.attachFilter(throwSensor);
@@ -68,7 +77,7 @@ void throwSensor(Filter* f) {
 void filterEvent(long value) { 
   digitalWrite(13, HIGH);
   Serial.println("throw detected");
-  xbee.write(nextGroup);
+  xbee.println(nextGroup);
 }
 
 void logCheck() {
